@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ContactList from "./components/ContactList/ContactList";
 import ContactForm from "./components/ContactForm/ContactForm";
 import SearchBox from "./components/SearchBox/SearchBox";
 import s from "./App.module.css";
+import { nanoid } from "nanoid";
+
+const LS_Key = "phonebookContacts";
 
 const App = () => {
   const initialContacts = [
@@ -28,8 +31,15 @@ const App = () => {
     },
   ];
 
-  const [contacts] = useState(initialContacts);
+  const [contacts, setContacts] = useState(() => {
+    const saved = localStorage.getItem(LS_Key);
+    return saved ? JSON.parse(saved) : initialContacts;
+  });
   const [filter, setFilter] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem(LS_Key, JSON.stringify(contacts));
+  }, [contacts]);
 
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
@@ -41,16 +51,37 @@ const App = () => {
       .includes(filter.toLowerCase())
   );
 
+  const handleAddContact = ({ name, number }) => {
+    const newContact = {
+      id: nanoid(),
+      name,
+      number,
+    };
+    setContacts((prevContacts) => [
+      ...prevContacts,
+      newContact,
+    ]);
+  };
+
+  const handleDeleteContact = (id) => {
+    setContacts((prevContacts) =>
+      prevContacts.filter((contact) => contact.id !== id)
+    );
+  };
+
   return (
     <div className={s.container}>
       <h1>Phonebook</h1>
-      <ContactForm />
+      <ContactForm onAdd={handleAddContact} />
       <SearchBox
         value={filter}
         onChange={handleFilterChange}
       />
       {filteredContacts.length > 0 ? (
-        <ContactList contacts={filteredContacts} />
+        <ContactList
+          contacts={filteredContacts}
+          onDelete={handleDeleteContact}
+        />
       ) : (
         <p>No contacts found</p>
       )}

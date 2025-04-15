@@ -2,7 +2,7 @@ import React from "react";
 import s from "./Contact.module.css";
 import { FaUser, FaPhone } from "react-icons/fa6";
 
-const Contact = ({ name, number }) => {
+const Contact = ({ name, number, id, onDelete }) => {
   return (
     <div className={s.contact}>
       <li>
@@ -15,7 +15,9 @@ const Contact = ({ name, number }) => {
           {number}
         </p>
       </li>
-      <button type="button">Delete</button>
+      <button type="button" onClick={() => onDelete(id)}>
+        Delete
+      </button>
     </div>
   );
 };
